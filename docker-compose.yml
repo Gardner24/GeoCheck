@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: geocheck_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_DB: geocheck
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Esto ejecuta automáticamente nuestros scripts SQL al levantar la BD
+      - ./db-init:/docker-entrypoint-initdb.d
+
+volumes:
+  pgdata:
