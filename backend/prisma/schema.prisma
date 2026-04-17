@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,45 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model registros {
+  id         Int                      @id @default(autoincrement())
+  usuario_id Int?
+  zona_id    Int?
+  ubicacion  Unsupported("geography")
+  valido     Boolean?
+  es_fraude  Boolean?                 @default(false)
+  timestamp  DateTime?                @default(now()) @db.Timestamptz(6)
+  usuarios   usuarios?                @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas      zonas?                   @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model usuarios {
+  id        Int         @id @default(autoincrement())
+  nombre    String      @db.VarChar(100)
+  email     String      @unique @db.VarChar(150)
+  password  String
+  rol       String?     @default("colaborador") @db.VarChar(20)
+  creado_en DateTime?   @default(now()) @db.Timestamptz(6)
+  registros registros[]
+}
+
+model zonas {
+  id        Int                      @id @default(autoincrement())
+  nombre    String                   @db.VarChar(100)
+  origen    Unsupported("geography")
+  radio_m   Int?                     @default(25)
+  ssid_wifi String?                  @db.VarChar(100)
+  activa    Boolean?                 @default(true)
+  registros registros[]
 }
